@@ -7,9 +7,9 @@ from google.genai import types
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-MODEL = "gemini-3.5-flash-lite"
+MODEL = "gemini-3.1-flash-lite"
 ALLOWED_CATEGORIES = {"bug", "feature_request", "performance", "monetization", "praise", "other"}
-ALLOWED_SENTIMENTS = {"positive", "negative", "mixed"}
+ALLOWED_SENTIMENTS = {"positive", "negative", "mixed", "neutral"}
 
 PROMPT_TEMPLATE = """You classify mobile game player reviews.
 
@@ -21,7 +21,7 @@ Categories (choose exactly one):
 - praise: positive feedback only
 - other: anything else
 
-Sentiment: positive, negative, or mixed.
+Sentiment: positive, negative, mixed, or neutral.
 
 Return JSON with keys: category, sentiment, summary (max 15 words, English).
 
@@ -42,13 +42,11 @@ def classify_review(review):
         ),
     )
 
-    # إذا لم يكن الرد JSON صالحًا، لا ينهار البرنامج
     try:
         result = json.loads(response.text)
     except json.JSONDecodeError:
         return {"category": None, "sentiment": None, "summary": None, "valid": False}
 
-    # نتحقق أن التصنيف والمشاعر من القوائم المسموحة
     result["valid"] = (
         result.get("category") in ALLOWED_CATEGORIES
         and result.get("sentiment") in ALLOWED_SENTIMENTS
