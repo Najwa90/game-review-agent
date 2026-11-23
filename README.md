@@ -137,7 +137,7 @@ The `data/` folder is not committed. Run `fetch_reviews.py` to rebuild it.
 
 ## How I built it
 
-I built this project step by step with an AI assistant (Claude) as a pair programmer. I ran every step myself, debugged the errors (rate limits, merge conflicts, indentation, file encodings), labeled the evaluation set by hand, and checked the outputs before trusting them.
+II built this project with Claude as an AI pair programmer. Claude wrote most of the first-draft code and explained it; my job was to run every step, debug what broke, and verify the outputs before trusting them. Examples: I confirmed from the logs that failures were 429 rate limits, read the `other` bucket by hand to find missing categories, labeled 50 reviews myself to measure accuracy, and checked every number in the AI-written report summary (9/9 correct).
 
 ## Next steps
 
