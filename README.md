@@ -80,4 +80,68 @@ The weekly report summary was also checked by hand: **9/9 numbers** in the LLM t
 
 ## Limitations
 
-- One label per review. A review with praise **and** a
+- One label per review. A review with praise **and** a complaint gets the main complaint only.
+- English, US store only. Turkish and other languages are not included yet.
+- Weekly counts are small. Changes under 5 reviews are reported as **signals, not trends**.
+- 16% of reviews have no app version, so version-level analysis is limited.
+
+---
+
+## Run it yourself
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate            # Windows
+pip install -r requirements.txt
+```
+
+Create a `.env` file with your key (never commit it):
+
+```
+GEMINI_API_KEY=your_key_here
+```
+
+Then:
+
+```bash
+python fetch_reviews.py      # 500 reviews -> data/reviews_raw.csv
+python eda.py                # quick data overview
+python classify_batch.py     # LLM classification -> data/reviews_classified.csv
+python retry_invalid.py      # re-run failed rows only
+python analyze_results.py    # topics, stars, versions, top complaints
+python weekly_report.py      # -> reports/weekly_report_<date>.md
+```
+
+Evaluation: `make_labeling_sample.py` → label the CSV by hand → `evaluate.py` → `adjudicate.py`.
+
+The `data/` folder is not committed. Run `fetch_reviews.py` to rebuild it.
+
+---
+
+## Project structure
+
+| File | Purpose |
+|---|---|
+| `fetch_reviews.py` | Collect reviews from Google Play |
+| `eda.py` | Star distribution, review length, app versions |
+| `classifier.py` | Prompt + `classify_review()` with validation |
+| `classify_batch.py` | Batch classification with retry and backoff |
+| `retry_invalid.py` | Targeted re-run of failed rows |
+| `analyze_results.py` | Topic and rating analysis |
+| `inspect_other.py` | Manual review of the `other` bucket |
+| `make_labeling_sample.py`, `evaluate.py`, `adjudicate.py` | Human evaluation |
+| `weekly_report.py` | Automated weekly report |
+| `classify_one.py`, `test_connection.py`, `list_models.py` | Early experiments and setup checks |
+
+---
+
+## How I built it
+
+I built this project step by step with an AI assistant (Claude) as a pair programmer. I ran every step myself, debugged the errors (rate limits, merge conflicts, indentation, file encodings), labeled the evaluation set by hand, and checked the outputs before trusting them.
+
+## Next steps
+
+- Second annotator and a larger evaluation set
+- Turkish reviews (`lang="tr"`)
+- Schedule the report weekly (e.g. GitHub Actions or Cloud Scheduler) and post it to Slack
+- Multi-label classification
